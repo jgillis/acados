@@ -52,7 +52,7 @@ def generate_c_code_external_cost(model, is_terminal):
     x = model.x
     p = model.p
 
-    if isinstance(x, casadi.MX):
+    if isinstance(x, MX):
         symbol = MX.sym
     else:
         symbol = SX.sym

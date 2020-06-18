@@ -111,7 +111,7 @@ def make_model_consistent(model):
 
     if isinstance(x, MX):
         symbol = MX.sym
-    elif isinstance(x, MX):
+    elif isinstance(x, SX):
         symbol = SX.sym
     else:
         raise Exception("model.x must be casadi.SX or casadi.MX, got {}".format(type(x)))
