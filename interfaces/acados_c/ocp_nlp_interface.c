@@ -425,6 +425,133 @@ int ocp_nlp_constraints_model_set(ocp_nlp_config *config, ocp_nlp_dims *dims,
 * out
 ************************************************/
 
+//addition
+void ocp_nlp_print_problem(ocp_nlp_config *config, ocp_nlp_dims *dims, ocp_nlp_in *in, ocp_nlp_out *out){
+    printf(" ---------- print_problem ------------- \n");
+
+    int nbx;
+    int nbu;
+    int nh;
+    int ng;
+
+    printf(" ---------- Initial values ------------- \n");
+    for(int i = 0; i<dims->N+1; i++){
+        printf(" ---------- Stage %i ------------- \n",i);
+        double* value = malloc(dims->nx[i]*sizeof(double));
+        ocp_nlp_out_get(config, dims, out, i, "x", value);
+        for(int j=0;j<dims->nx[i];j++){
+            printf("x[%i] = %e  \n",j,value[j]);
+        }
+        free(value);
+        value = malloc(dims->nu[i]*sizeof(double));
+        if (i<dims->N) {
+            ocp_nlp_out_get(config, dims, out, i, "u", value);
+            for(int j=0;j<dims->nu[i];j++){
+                printf("u[%i] = %e  \n",j,value[j]);
+            }
+        }
+        free(value);
+    }
+
+    for(int i = 0; i<dims->N+1; i++){
+
+        ocp_nlp_constraints_config *constr_config = config->constraints[i];
+
+        printf(" ---------- Stage %i ------------- \n",i);
+
+        // Bounds on x
+
+        constr_config->dims_get(constr_config,dims->constraints[i],"nbx",&nbx); //get n
+printf(" ---------- nbx %i ------------- \n",nbx);
+
+        double *value_b = malloc(nbx * sizeof(double));
+
+        constr_config->model_get(constr_config, dims->constraints[i], in->constraints[i], "lbx", value_b);
+        
+        for(int j=0;j<nbx;j++){
+            printf("lbx[%i] = %e  \n",j,value_b[j]);
+        }
+
+        constr_config->model_get(constr_config, dims->constraints[i], in->constraints[i], "ubx", value_b);
+
+        for(int j=0;j<nbx;j++){
+            printf("ubx[%i] = %e \n",j,value_b[j]);
+        }
+
+        free(value_b);
+
+        // Bounds on u
+
+        constr_config->dims_get(constr_config,dims->constraints[i],"nbu",&nbu); //get n
+
+        double *value_u = malloc(nbu * sizeof(double));
+
+        constr_config->model_get(constr_config, dims->constraints[i], in->constraints[i], "lbu", value_u);
+        
+        for(int j=0;j<nbu;j++){
+            printf("lbu[%i] = %e  \n",j,value_u[j]);
+        }
+    
+        constr_config->model_get(constr_config, dims->constraints[i], in->constraints[i], "ubu", value_u);
+
+        for(int j=0;j<nbu;j++){
+            printf("ubu[%i] = %e \n",j,value_u[j]);
+        }
+
+        free(value_u);
+
+
+
+        // G
+        
+        constr_config->dims_get(constr_config,dims->constraints[i],"ng",&ng); //get n
+
+        double *value_g = malloc(ng * sizeof(double));
+
+        constr_config->model_get(constr_config, dims->constraints[i], in->constraints[i], "ug", value_g);
+
+        for(int j=0;j<ng;j++){
+            printf("ug[%i] = %e \n",j,value_g[j]);
+        }
+
+        constr_config->model_get(constr_config, dims->constraints[i], in->constraints[i], "lg", value_g);
+
+        for(int j=0;j<ng;j++){
+            printf("lg[%i] = %e \n",j,value_g[j]);
+        }
+
+        free(value_g);
+
+
+        // H
+        
+        constr_config->dims_get(constr_config,dims->constraints[i],"nh",&nh); //get n
+
+        double *value_h = malloc(nh * sizeof(double));
+
+        constr_config->model_get(constr_config, dims->constraints[i], in->constraints[i], "uh", value_h);
+
+        for(int j=0;j<nh;j++){
+            printf("uh[%i] = %e \n",j,value_h[j]);
+        }
+
+        constr_config->model_get(constr_config, dims->constraints[i], in->constraints[i], "lh", value_h);
+
+        for(int j=0;j<nh;j++){
+            printf("lh[%i] = %e \n",j,value_h[j]);
+        }
+
+        free(value_h);
+
+        // 
+
+        
+
+           
+    }
+}
+
+
 ocp_nlp_out *ocp_nlp_out_create(ocp_nlp_config *config, ocp_nlp_dims *dims)
 {
     int bytes = ocp_nlp_out_calculate_size(config, dims);
@@ -787,8 +914,6 @@ void *ocp_nlp_solver_opts_create(ocp_nlp_config *config, ocp_nlp_dims *dims)
 
     return opts;
 }
-
-
 
 void ocp_nlp_solver_opts_set(ocp_nlp_config *config, void *opts_, const char *field, void *value)
 {

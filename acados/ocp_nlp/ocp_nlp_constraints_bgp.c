@@ -622,6 +622,205 @@ void *ocp_nlp_constraints_bgp_model_assign(void *config, void *dims_, void *raw_
     return model;
 }
 
+int ocp_nlp_constraints_bgp_model_get(void *config_, void *dims_,
+                         void *model_, const char *field, void *value){
+
+
+    // NOTE(oj): this is adapted from the bgh module, maybe something has to be changed here.
+    ocp_nlp_constraints_bgp_dims *dims = (ocp_nlp_constraints_bgp_dims *) dims_;
+    ocp_nlp_constraints_bgp_model *model = (ocp_nlp_constraints_bgp_model *) model_;
+
+    int ii;
+    int *ptr_i;
+
+    if (!dims || !model || !field || !value)
+    {
+        printf("ocp_nlp_constraints_bgp_model_set: got Null pointer \n");
+        exit(1);
+    }
+
+    int nu = dims->nu;
+    int nx = dims->nx;
+    int nb = dims->nb;
+    int ng = dims->ng;
+    int nphi = dims->nphi;
+    int ns = dims->ns;
+    int nsbu = dims->nsbu;
+    int nsbx = dims->nsbx;
+    int nsg = dims->nsg;
+    int nsphi = dims->nsphi;
+    int nbx = dims->nbx;
+    int nbu = dims->nbu;
+    int nbue = dims->nbue;
+    int nbxe = dims->nbxe;
+    int nge = dims->nge;
+    int nphie = dims->nphie;
+
+    if (!strcmp(field, "lb")) // TODO(fuck_lint) remove !!!
+    {
+        // blasfeo_pack_dvec(nb, value, 1, &model->d, 0);
+        blasfeo_unpack_dvec(nb, &model->d, 0, value, 1); //swap
+
+    }
+    else if (!strcmp(field, "ub")) // TODO(fuck_lint) remove !!!
+    {
+        // blasfeo_pack_dvec(nb, value, 1, &model->d, nb+ng+nphi);
+        blasfeo_unpack_dvec(nb, &model->d, nb+ng+nphi, value, 1); //swap
+        printf("I am here");
+
+    }
+    else if (!strcmp(field, "idxbx"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nbx; ii++)
+            model->idxb[nbu+ii] = nu+ptr_i[ii];
+    }
+    else if (!strcmp(field, "lbx"))
+    {
+        blasfeo_pack_dvec(nbx, value, 1, &model->d, nbu);
+    }
+    else if (!strcmp(field, "ubx"))
+    {
+        blasfeo_pack_dvec(nbx, value, 1, &model->d, nb + ng + nphi + nbu);
+    }
+    else if (!strcmp(field, "idxbu"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nbu; ii++)
+            model->idxb[ii] = ptr_i[ii];
+    }
+    else if (!strcmp(field, "lbu"))
+    {
+        blasfeo_pack_dvec(nbu, value, 1, &model->d, 0);
+    }
+    else if (!strcmp(field, "ubu"))
+    {
+        blasfeo_pack_dvec(nbu, value, 1, &model->d, nb + ng + nphi);
+    }
+    else if (!strcmp(field, "C"))
+    {
+        blasfeo_pack_tran_dmat(ng, nx, value, ng, &model->DCt, nu, 0);
+    }
+    else if (!strcmp(field, "D"))
+    {
+        blasfeo_pack_tran_dmat(ng, nu, value, ng, &model->DCt, 0, 0);
+    }
+    else if (!strcmp(field, "lg"))
+    {
+        blasfeo_pack_dvec(ng, value, 1, &model->d, nb);
+    }
+    else if (!strcmp(field, "ug"))
+    {
+        blasfeo_pack_dvec(ng, value, 1, &model->d, 2*nb+ng+nphi);
+    }
+    else if (!strcmp(field, "nl_constr_phi_o_r_fun_phi_jac_ux_z_phi_hess_r_jac_ux"))
+    {
+        model->nl_constr_phi_o_r_fun_phi_jac_ux_z_phi_hess_r_jac_ux = value;
+    }
+    else if (!strcmp(field, "nl_constr_phi_o_r_fun"))
+    {
+        model->nl_constr_phi_o_r_fun = value;
+    }
+    else if (!strcmp(field, "lphi")) // TODO(fuck_lint) remove
+    {
+        blasfeo_pack_dvec(nphi, value, 1, &model->d, nb+ng);
+    }
+    else if (!strcmp(field, "uphi"))
+    {
+        blasfeo_pack_dvec(nphi, value, 1, &model->d, 2*nb+2*ng+nphi);
+    }
+    else if (!strcmp(field, "idxsbu"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nsbu; ii++)
+            model->idxs[ii] = ptr_i[ii];
+    }
+    else if (!strcmp(field, "lsbu"))
+    {
+        blasfeo_pack_dvec(nsbu, value, 1, &model->d, 2*nb+2*ng+2*nphi);
+    }
+    else if (!strcmp(field, "usbu"))
+    {
+        blasfeo_pack_dvec(nsbu, value, 1, &model->d, 2*nb+2*ng+2*nphi+ns);
+    }
+    else if (!strcmp(field, "idxsbx"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nsbx; ii++)
+            model->idxs[nsbu+ii] = nbu+ptr_i[ii];
+    }
+    else if (!strcmp(field, "lsbx"))
+    {
+        blasfeo_pack_dvec(nsbx, value, 1, &model->d, 2*nb+2*ng+2*nphi+nsbu);
+    }
+    else if (!strcmp(field, "usbx"))
+    {
+        blasfeo_pack_dvec(nsbx, value, 1, &model->d, 2*nb+2*ng+2*nphi+ns+nsbu);
+    }
+    else if (!strcmp(field, "idxsg"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nsg; ii++)
+            model->idxs[nsbu+nsbx+ii] = nbu+nbx+ptr_i[ii];
+    }
+    else if (!strcmp(field, "lsg"))
+    {
+        blasfeo_pack_dvec(nsg, value, 1, &model->d, 2*nb+2*ng+2*nphi+nsbu+nsbx);
+    }
+    else if (!strcmp(field, "usg"))
+    {
+        blasfeo_pack_dvec(nsg, value, 1, &model->d, 2*nb+2*ng+2*nphi+ns+nsbu+nsbx);
+    }
+    else if (!strcmp(field, "idxsphi"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nsphi; ii++)
+            model->idxs[nsbu+nsbx+nsg+ii] = nbu+nbx+ng+ptr_i[ii];
+    }
+    else if (!strcmp(field, "lsphi"))
+    {
+        blasfeo_pack_dvec(nsphi, value, 1, &model->d, 2*nb+2*ng+2*nphi+nsbu+nsbx+nsg);
+    }
+    else if (!strcmp(field, "usphi"))
+    {
+        blasfeo_pack_dvec(nsphi, value, 1, &model->d, 2*nb+2*ng+2*nphi+ns+nsbu+nsbx+nsg);
+    }
+    else if (!strcmp(field, "idxbue"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nbue; ii++)
+            model->idxe[ii] = ptr_i[ii];
+    }
+    else if (!strcmp(field, "idxbxe"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nbxe; ii++)
+            model->idxe[nbue+ii] = nbu+ptr_i[ii];
+    }
+    else if (!strcmp(field, "idxge"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nge; ii++)
+            model->idxe[nbue+nbxe+ii] = nbu+nbx+ptr_i[ii];
+    }
+    else if (!strcmp(field, "idxphie"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nphie; ii++)
+            model->idxe[nbue+nbxe+nge+ii] = nbu+nbx+ng+ptr_i[ii];
+    }
+    else
+    {
+        printf("\nerror: model field not available in module ocp_nlp_constraints_bgp: %s\n",
+            field);
+        exit(1);
+    }
+
+    return ACADOS_SUCCESS;
+
+}
+
+
 
 int ocp_nlp_constraints_bgp_model_set(void *config_, void *dims_,
                          void *model_, const char *field, void *value)

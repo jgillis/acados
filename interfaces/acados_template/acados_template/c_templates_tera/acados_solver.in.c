@@ -1698,10 +1698,28 @@ int {{ model.name }}_acados_update_params(nlp_solver_capsule * capsule, int stag
     return solver_status;
 }
 
+int {{ model.name }}_acados_print_problem(nlp_solver_capsule * capsule)
+{
+    ocp_nlp_print_problem(capsule->nlp_config, capsule->nlp_dims, capsule->nlp_in, capsule->nlp_out);
 
+    printf(" ---------- parameters ------------- \n");
+
+    printf(" ---------- Initial values ------------- \n");
+    for(int i = 0; i<N; i++){
+        printf(" ---------- Stage %i ------------- \n",i);
+        for(int j=0;j<NP;j++){
+            printf("p[%i] = %e  \n",j,capsule->ext_cost_fun[i].p[j]);
+        }
+    }
+    printf(" ---------- Stage %i ------------- \n",N);
+    for(int j=0;j<NP;j++){
+        printf("p[%i] = %e  \n",j,capsule->ext_cost_e_fun.p[j]);
+    }
+}
 
 int {{ model.name }}_acados_solve(nlp_solver_capsule * capsule)
 {
+    {{ model.name }}_acados_print_problem(capsule);
     // solve NLP 
     int solver_status = ocp_nlp_solve(capsule->nlp_solver, capsule->nlp_in, capsule->nlp_out);
 

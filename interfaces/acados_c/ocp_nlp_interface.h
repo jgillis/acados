@@ -244,6 +244,9 @@ int ocp_nlp_constraints_model_set(ocp_nlp_config *config, ocp_nlp_dims *dims,
 
 /* out */
 
+//addition
+void ocp_nlp_print_problem(ocp_nlp_config *config, ocp_nlp_dims *dims,ocp_nlp_in *in,ocp_nlp_out *out);
+
 /// Constructs an output struct for the non-linear program.
 ///
 /// \param config The configuration struct.

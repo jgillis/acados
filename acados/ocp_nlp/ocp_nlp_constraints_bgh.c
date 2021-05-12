@@ -822,6 +822,219 @@ int ocp_nlp_constraints_bgh_model_set(void *config_, void *dims_,
 }
 
 
+
+
+int ocp_nlp_constraints_bgh_model_get(void *config_, void *dims_,
+                         void *model_, const char *field, void *value)
+{
+    ocp_nlp_constraints_bgh_dims *dims = (ocp_nlp_constraints_bgh_dims *) dims_;
+    ocp_nlp_constraints_bgh_model *model = (ocp_nlp_constraints_bgh_model *) model_;
+
+    int ii;
+    int *ptr_i;
+
+    if (!dims || !model || !field || !value)
+    {
+        printf("ocp_nlp_constraints_bgh_model_set: got Null pointer \n");
+        exit(1);
+    }
+
+    int nu = dims->nu;
+    int nx = dims->nx;
+    int nb = dims->nb;
+    int ng = dims->ng;
+    int nh = dims->nh;
+    int ns = dims->ns;
+    int nsbu = dims->nsbu;
+    int nsbx = dims->nsbx;
+    int nsg = dims->nsg;
+    int nsh = dims->nsh;
+    int nbx = dims->nbx;
+    int nbu = dims->nbu;
+    int nbue = dims->nbue;
+    int nbxe = dims->nbxe;
+    int nge = dims->nge;
+    int nhe = dims->nhe;
+
+    // TODO(oj): document which strings mean what! - adapted from prev implementation..
+    // if (!strcmp(field, "lb")) // TODO remove !!!
+    // {
+    //     // blasfeo_pack_dvec(nb, value, 1, &model->d, 0);
+    //     blasfeo_unpack_dvec(nb, &model->d, 0, value, 1);
+    // }
+    // else if (!strcmp(field, "ub")) // TODO remove !!!
+    // {
+    //     // blasfeo_pack_dvec(nb, value, 1, &model->d, nb+ng+nh);
+    //     blasfeo_unpack_dvec(nb, &model->d, nb+ng+nh, value, 1);
+    // }
+    // else if (!strcmp(field, "idxbx"))
+    // {
+    //     ptr_i = (int *) value;
+    //     for (ii=0; ii < nbx; ii++)
+    //         model->idxb[nbu+ii] = nu+ptr_i[ii];
+    // }
+    if (!strcmp(field, "lbx"))
+    {
+        // blasfeo_pack_dvec(nbx, value, 1, &model->d, nbu);
+        blasfeo_unpack_dvec(nbx, &model->d, nbu, value, 1);
+    }
+    else if (!strcmp(field, "ubx"))
+    {
+        // blasfeo_pack_dvec(nbx, value, 1, &model->d, nb + ng + nh + nbu);
+        blasfeo_unpack_dvec(nbx, &model->d, nb + ng + nh + nbu, value, 1);
+    }
+    // else if (!strcmp(field, "idxbu"))
+    // {
+    //     ptr_i = (int *) value;
+    //     for (ii=0; ii < nbu; ii++)
+    //         model->idxb[ii] = ptr_i[ii];
+    // }
+    else if (!strcmp(field, "lbu"))
+    {
+        // blasfeo_pack_dvec(nbu, value, 1, &model->d, 0);
+        blasfeo_unpack_dvec(nbu, &model->d, 0, value, 1);
+    }
+    else if (!strcmp(field, "ubu"))
+    {
+        // blasfeo_pack_dvec(nbu, value, 1, &model->d, nb + ng + nh);
+        blasfeo_unpack_dvec(nbu, &model->d, nb + ng + nh, value, 1);
+    }
+    else if (!strcmp(field, "C"))
+    {
+        // blasfeo_pack_tran_dmat(ng, nx, value, ng, &model->DCt, nu, 0);
+        blasfeo_unpack_tran_dmat(ng, nx, &model->DCt, nu, 0, value, ng);
+
+        // void blasfeo_unpack_tran_dmat(int m, int n,    struct blasfeo_dmat *sA, int ai, int aj, double *A, int lda)
+        // void blasfeo_pack_tran_dmat(int m, int n,      double *A, int lda, struct blasfeo_dmat *sA, int ai, int aj)
+    }
+    else if (!strcmp(field, "D"))
+    {
+        blasfeo_pack_tran_dmat(ng, nu, value, ng, &model->DCt, 0, 0);
+    }
+    else if (!strcmp(field, "lg"))
+    {
+        // blasfeo_pack_dvec(ng, value, 1, &model->d, nb);
+        blasfeo_unpack_dvec(ng,  &model->d, nb, value, 1);
+    }
+    else if (!strcmp(field, "ug"))
+    {
+        // blasfeo_pack_dvec(ng, value, 1, &model->d, 2*nb+ng+nh);
+        blasfeo_unpack_dvec(ng, &model->d, 2*nb+ng+nh, value, 1);
+    }
+    else if (!strcmp(field, "nl_constr_h_fun"))
+    {
+        // model->nl_constr_h_fun = value;
+        value = model->nl_constr_h_fun;
+    }
+    else if (!strcmp(field, "nl_constr_h_fun_jac"))
+    {
+        model->nl_constr_h_fun_jac = value;
+    }
+    else if (!strcmp(field, "nl_constr_h_fun_jac_hess"))
+    {
+        model->nl_constr_h_fun_jac_hess = value;
+    }
+    else if (!strcmp(field, "lh"))
+    {
+        // blasfeo_pack_dvec(nh, value, 1, &model->d, nb+ng);
+        blasfeo_unpack_dvec(nh, &model->d, nb+ng, value, 1);
+    }
+    else if (!strcmp(field, "uh"))
+    {
+        // blasfeo_pack_dvec(nh, value, 1, &model->d, 2*nb+2*ng+nh);
+        blasfeo_unpack_dvec(nh, &model->d, 2*nb+2*ng+nh, value, 1 );
+    }
+    else if (!strcmp(field, "idxsbu"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nsbu; ii++)
+            model->idxs[ii] = ptr_i[ii];
+    }
+    else if (!strcmp(field, "lsbu"))
+    {
+        blasfeo_pack_dvec(nsbu, value, 1, &model->d, 2*nb+2*ng+2*nh);
+    }
+    else if (!strcmp(field, "usbu"))
+    {
+        blasfeo_pack_dvec(nsbu, value, 1, &model->d, 2*nb+2*ng+2*nh+ns);
+    }
+    else if (!strcmp(field, "idxsbx"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nsbx; ii++)
+            model->idxs[nsbu+ii] = nbu+ptr_i[ii];
+    }
+    else if (!strcmp(field, "lsbx"))
+    {
+        blasfeo_pack_dvec(nsbx, value, 1, &model->d, 2*nb+2*ng+2*nh+nsbu);
+    }
+    else if (!strcmp(field, "usbx"))
+    {
+        blasfeo_pack_dvec(nsbx, value, 1, &model->d, 2*nb+2*ng+2*nh+ns+nsbu);
+    }
+    else if (!strcmp(field, "idxsg"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nsg; ii++)
+            model->idxs[nsbu+nsbx+ii] = nbu+nbx+ptr_i[ii];
+    }
+    else if (!strcmp(field, "lsg"))
+    {
+        blasfeo_pack_dvec(nsg, value, 1, &model->d, 2*nb+2*ng+2*nh+nsbu+nsbx);
+    }
+    else if (!strcmp(field, "usg"))
+    {
+        blasfeo_pack_dvec(nsg, value, 1, &model->d, 2*nb+2*ng+2*nh+ns+nsbu+nsbx);
+    }
+    else if (!strcmp(field, "idxsh"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nsh; ii++)
+            model->idxs[nsbu+nsbx+nsg+ii] = nbu+nbx+ng+ptr_i[ii];
+    }
+    else if (!strcmp(field, "lsh"))
+    {
+        blasfeo_pack_dvec(nsh, value, 1, &model->d, 2*nb+2*ng+2*nh+nsbu+nsbx+nsg);
+    }
+    else if (!strcmp(field, "ush"))
+    {
+        blasfeo_pack_dvec(nsh, value, 1, &model->d, 2*nb+2*ng+2*nh+ns+nsbu+nsbx+nsg);
+    }
+    else if (!strcmp(field, "idxbue"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nbue; ii++)
+            model->idxe[ii] = ptr_i[ii];
+    }
+    else if (!strcmp(field, "idxbxe"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nbxe; ii++)
+            model->idxe[nbue+ii] = nbu+ptr_i[ii];
+    }
+    else if (!strcmp(field, "idxge"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nge; ii++)
+            model->idxe[nbue+nbxe+ii] = nbu+nbx+ptr_i[ii];
+    }
+    else if (!strcmp(field, "idxhe"))
+    {
+        ptr_i = (int *) value;
+        for (ii=0; ii < nhe; ii++)
+            model->idxe[nbue+nbxe+nge+ii] = nbu+nbx+ng+ptr_i[ii];
+    }
+    else
+    {
+        printf("\nerror: model field not available in module ocp_nlp_constraints_bgh: %s\n", field);
+        exit(1);
+    }
+
+    return ACADOS_SUCCESS;
+}
+
+
+
 /************************************************
  * options
  ************************************************/
@@ -1567,6 +1780,7 @@ void ocp_nlp_constraints_bgh_config_initialize_default(void *config_)
     config->model_calculate_size = &ocp_nlp_constraints_bgh_model_calculate_size;
     config->model_assign = &ocp_nlp_constraints_bgh_model_assign;
     config->model_set = &ocp_nlp_constraints_bgh_model_set;
+    config->model_get = &ocp_nlp_constraints_bgh_model_get;
     config->opts_calculate_size = &ocp_nlp_constraints_bgh_opts_calculate_size;
     config->opts_assign = &ocp_nlp_constraints_bgh_opts_assign;
     config->opts_initialize_default = &ocp_nlp_constraints_bgh_opts_initialize_default;
